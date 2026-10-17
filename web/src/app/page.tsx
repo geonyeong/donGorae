@@ -3,6 +3,9 @@ import { Hero } from "@/components/Hero";
 import { ProgramCard } from "@/components/ProgramCard";
 import { getClosingSoon, getNewest } from "@/lib/programs";
 
+// Docker 빌드 시점에는 DB가 없어 더미가 박제됨 → 요청마다 DB 조회
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [newest, closing] = await Promise.all([getNewest(2), getClosingSoon(6)]);
 

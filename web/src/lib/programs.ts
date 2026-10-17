@@ -136,7 +136,13 @@ export async function getPrograms(filters: ProgramFilters = {}): Promise<Program
   `;
 
   const rows = await queryPrograms(sql, params);
-  return rows ?? filterDummy(filters);
+  // 운영에서는 더미 폴백 금지 (빌드 시 박제 방지). 로컬만 USE_DUMMY_DATA=1
+  if (rows) return rows;
+  return useDummyFallback() ? filterDummy(filters) : [];
+}
+
+function useDummyFallback(): boolean {
+  return process.env.USE_DUMMY_DATA === "1" || process.env.NODE_ENV === "development";
 }
 
 export async function getProgramById(id: number): Promise<Program | null> {
@@ -147,6 +153,7 @@ export async function getProgramById(id: number): Promise<Program | null> {
     [id],
   );
   if (rows) return rows[0] ?? null;
+  if (!useDummyFallback()) return null;
   return DUMMY_PROGRAMS.find((p) => p.id === id) ?? null;
 }
 
@@ -161,6 +168,7 @@ export async function getClosingSoon(limit = 6): Promise<Program[]> {
     [limit],
   );
   if (rows) return rows;
+  if (!useDummyFallback()) return [];
   return DUMMY_PROGRAMS.filter((p) => p.status === "open" && p.applyEnd)
     .sort((a, b) => (a.applyEnd! > b.applyEnd! ? 1 : -1))
     .slice(0, limit);
@@ -176,6 +184,7 @@ export async function getNewest(limit = 4): Promise<Program[]> {
     [limit],
   );
   if (rows) return rows;
+  if (!useDummyFallback()) return [];
   return [...DUMMY_PROGRAMS]
     .sort((a, b) => (a.collectedAt < b.collectedAt ? 1 : -1))
     .slice(0, limit);
