@@ -1,0 +1,63 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: dongorae-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-dongorae_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-dongorae}
+      MYSQL_USER: ${MYSQL_USER:-dongorae}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dongorae}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - dongorae_mysql_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-dongorae_root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: dongorae-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_USER: ${MYSQL_USER:-dongorae}
+      DATABASE_PASSWORD: ${MYSQL_PASSWORD:-dongorae}
+      DATABASE_NAME: ${MYSQL_DATABASE:-dongorae}
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+
+  crawler:
+    build:
+      context: ./crawler
+      dockerfile: Dockerfile
+    container_name: dongorae-crawler
+    profiles: ["crawler"]
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_USER: ${MYSQL_USER:-dongorae}
+      DATABASE_PASSWORD: ${MYSQL_PASSWORD:-dongorae}
+      DATABASE_NAME: ${MYSQL_DATABASE:-dongorae}
+      CRAWL_DELAY_SEC: ${CRAWL_DELAY_SEC:-3}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dongorae_mysql_data:

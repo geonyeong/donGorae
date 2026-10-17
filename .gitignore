@@ -1,0 +1,31 @@
+# env
+.env
+.env.local
+.env.*.local
+
+# deps / build
+node_modules/
+web/node_modules/
+web/.next/
+web/out/
+web/dist/
+__pycache__/
+crawler/__pycache__/
+crawler/.venv/
+.venv/
+*.pyc
+.Python
+web/.env.local
+
+# logs / OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# docker
+mysql_data/
