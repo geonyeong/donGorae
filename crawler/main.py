@@ -10,8 +10,10 @@ from __future__ import annotations
 from datetime import datetime
 
 from db import get_connection
+from job_sources import JOB_SOURCES
 from sources import SOURCES
 from upsert import upsert_programs
+from upsert_jobs import upsert_jobs
 
 
 def start_run(conn) -> int:
@@ -75,6 +77,28 @@ def main() -> None:
                     )
                 except Exception as exc:  # 소스 단위 실패는 전체 중단하지 않음
                     msg = f"{source.code}: {exc}"
+                    errors.append(msg)
+                    print(f"[error] {msg}")
+                    conn.rollback()
+                finally:
+                    source.close()
+
+            if not JOB_SOURCES:
+                print("[jobs] no sources configured — skip")
+            for source in JOB_SOURCES:
+                try:
+                    jobs = source.collect()
+                    new_count, updated_count = upsert_jobs(conn, jobs)
+                    total_new += new_count
+                    total_updated += updated_count
+                    mark_source_success(conn, source.code)
+                    conn.commit()
+                    print(
+                        f"[job:{source.code}] collected={len(jobs)} "
+                        f"new={new_count} updated={updated_count}"
+                    )
+                except Exception as exc:
+                    msg = f"job:{source.code}: {exc}"
                     errors.append(msg)
                     print(f"[error] {msg}")
                     conn.rollback()

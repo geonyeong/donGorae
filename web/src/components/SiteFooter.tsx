@@ -10,7 +10,7 @@ export async function SiteFooter() {
           <p className="font-[family-name:var(--font-display)] text-lg text-white/80">
             돈고래 DonGorae
           </p>
-          <p className="mt-1">창업 공고·지원사업을 한눈에.</p>
+          <p className="mt-1">창업 공고와 개발 일감을 한눈에.</p>
         </div>
         <p>데이터 기준: {dataAsOf} (주 1회 수집)</p>
       </div>

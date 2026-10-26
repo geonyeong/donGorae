@@ -21,7 +21,7 @@ export function SiteHeader() {
             <span className="ml-2 text-sm font-normal text-primary">DonGorae</span>
           </span>
         </Link>
-        <nav>
+        <nav className="flex items-center gap-1">
           <Link
             href="/programs"
             className={cn(
@@ -29,7 +29,16 @@ export function SiteHeader() {
               "text-white/80 hover:bg-white/10 hover:text-primary",
             )}
           >
-            공고 전체
+            공고
+          </Link>
+          <Link
+            href="/jobs"
+            className={cn(
+              buttonVariants({ variant: "ghost" }),
+              "text-white/80 hover:bg-white/10 hover:text-primary",
+            )}
+          >
+            일감
           </Link>
         </nav>
       </div>

@@ -138,10 +138,10 @@ export async function getPrograms(filters: ProgramFilters = {}): Promise<Program
   const rows = await queryPrograms(sql, params);
   // 운영에서는 더미 폴백 금지 (빌드 시 박제 방지). 로컬만 USE_DUMMY_DATA=1
   if (rows) return rows;
-  return useDummyFallback() ? filterDummy(filters) : [];
+  return allowDummyFallback() ? filterDummy(filters) : [];
 }
 
-function useDummyFallback(): boolean {
+function allowDummyFallback(): boolean {
   return process.env.USE_DUMMY_DATA === "1" || process.env.NODE_ENV === "development";
 }
 
@@ -153,7 +153,7 @@ export async function getProgramById(id: number): Promise<Program | null> {
     [id],
   );
   if (rows) return rows[0] ?? null;
-  if (!useDummyFallback()) return null;
+  if (!allowDummyFallback()) return null;
   return DUMMY_PROGRAMS.find((p) => p.id === id) ?? null;
 }
 
@@ -168,7 +168,7 @@ export async function getClosingSoon(limit = 6): Promise<Program[]> {
     [limit],
   );
   if (rows) return rows;
-  if (!useDummyFallback()) return [];
+  if (!allowDummyFallback()) return [];
   return DUMMY_PROGRAMS.filter((p) => p.status === "open" && p.applyEnd)
     .sort((a, b) => (a.applyEnd! > b.applyEnd! ? 1 : -1))
     .slice(0, limit);
@@ -184,7 +184,7 @@ export async function getNewest(limit = 4): Promise<Program[]> {
     [limit],
   );
   if (rows) return rows;
-  if (!useDummyFallback()) return [];
+  if (!allowDummyFallback()) return [];
   return [...DUMMY_PROGRAMS]
     .sort((a, b) => (a.collectedAt < b.collectedAt ? 1 : -1))
     .slice(0, limit);
@@ -194,12 +194,26 @@ export async function getDataAsOf(): Promise<string> {
   try {
     const pool = getPool();
     const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT DATE_FORMAT(MAX(collected_at), '%Y-%m-%d') AS d FROM programs`,
+      `SELECT DATE_FORMAT(MAX(collected_at), '%Y-%m-%d') AS d
+       FROM (
+         SELECT collected_at FROM programs
+         UNION ALL
+         SELECT collected_at FROM jobs
+       ) AS collected`,
     );
     const d = rows[0]?.d as string | null;
     if (d) return d;
   } catch {
-    // fallback
+    try {
+      const pool = getPool();
+      const [rows] = await pool.query<RowDataPacket[]>(
+        `SELECT DATE_FORMAT(MAX(collected_at), '%Y-%m-%d') AS d FROM programs`,
+      );
+      const d = rows[0]?.d as string | null;
+      if (d) return d;
+    } catch {
+      // jobs 테이블이 아직 없으면 공고 기준일만 사용
+    }
   }
   return DATA_AS_OF;
 }
