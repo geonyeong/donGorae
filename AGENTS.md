@@ -8,7 +8,7 @@
 ## 1. 프로젝트 개요
 
 - **프로젝트명**: 돈고래 (DonGorae)
-- **목적**: 한국의 창업 경진대회·창업지원 사업 등 창업 관련 공고를 수집해 한눈에 보여주는 웹사이트
+- **목적**: 한국의 창업 경진대회·창업지원 사업 공고와 프리랜서 개발 일감을 수집해 보여주는 웹사이트. 홈은 창업 공고가 메인, 일감은 `/jobs`
 - **핵심 사용자**: 예비창업자·초기창업자·대학생 등 창업 정보를 찾는 일반 사용자 (초기 버전은 로그인 없이 열람)
 - **현재 단계**: 개발 중 (MVP)
 - **톤**: 스타트업 미디어형 (비주얼·히어로 강조). 정부 포털 UI 금지
@@ -22,7 +22,7 @@
 | DB/ORM | MySQL 8 (초기 ORM 없이 `mysql2` 또는 Prisma — 도입 시 이 문서 갱신) |
 | 스타일링 | Tailwind CSS + shadcn/ui |
 | 테스트 | 없음 (수동 체크리스트로 대체) |
-| 배포 | Docker Compose → 네이버 클라우드 플랫폼(NCP) Ubuntu VM |
+| 배포 | Docker Compose → AWS Lightsail Ubuntu. 도메인 `dongorae.60fn.com` (Cloudflare). 배포는 서버에서 `git pull` 후 `docker compose build web && docker compose up -d web` |
 | 패키지 매니저 | npm (web) / pip + requirements.txt (crawler) |
 
 ## 3. 폴더 구조
@@ -35,12 +35,14 @@
 │   ├── src/lib/                # DB·유틸
 │   └── public/
 ├── crawler/                    # Python 주간 수집기
-│   ├── sources/                # 소스별 파서 (kstartup, bizinfo, kised, mss)
-│   ├── normalize.py
-│   ├── upsert.py
+│   ├── sources/                # 공고 파서 (kstartup, bizinfo, kised, mss)
+│   ├── job_sources/            # 일감 파서. 소스 확정 전 빈 목록
+│   ├── normalize.py / upsert.py
+│   ├── job_normalize.py / upsert_jobs.py
 │   └── main.py
 ├── db/
-│   └── schema.sql              # MySQL 스키마·시드
+│   ├── schema.sql              # 신규 볼륨용 스키마
+│   └── migrations/             # 기존 DB 변경 (002_jobs.sql)
 ├── docker-compose.yml
 ├── .env.example
 └── AGENTS.md
@@ -54,7 +56,9 @@
 | UI 컴포넌트 | `web/src/components/` |
 | DB 접속·쿼리 | `web/src/lib/` |
 | DB 스키마 | `db/schema.sql` |
-| 수집 파서 | `crawler/sources/` |
+| 공고 파서 | `crawler/sources/` |
+| 일감 파서 | `crawler/job_sources/` |
+| 기존 DB 변경 | `db/migrations/` |
 | 환경변수 | `.env`, `.env.example`, `docker-compose.yml` |
 
 ## 4. 코딩 컨벤션
@@ -146,7 +150,8 @@ for url in urls:
 - 파일을 삭제하거나 대규모로 리팩토링하기 전, 먼저 계획을 요약해서 알려줄 것
 - 확신이 없는 사항은 임의로 결정하지 말고 질문할 것
 - `git push`는 개발자 요청 또는 승인 없이는 절대 금지
-- 1차 수집 소스: K-Startup, 기업마당(bizinfo), 창업진흥원(kised), 중기부(mss) — 신규 소스 추가 전 공유
+- 1차 공고 소스: K-Startup, 기업마당(bizinfo), 창업진흥원(kised), 중기부(mss) — 신규 소스 추가 전 공유
+- 일감은 `jobs` 테이블과 `/jobs`만 사용. `programs`에 컬럼을 섞지 말 것. `job_sources`에 사이트를 넣기 전 이용약관·소스 확정을 물을 것. 로그인 뒤 본문 수집 금지
 - UI는 스타트업 미디어형 유지. 보라 그라데이션·크림+세리프 등 흔한 AI 기본 룩 지양
 
 ---
@@ -191,7 +196,7 @@ for url in urls:
 ## 12. 프로젝트별 추가 규칙
 
 - 서비스명·브랜드: **돈고래 (DonGorae)** — 히어로에서 브랜드가 최상위 시그널
-- 호스팅: **NCP** (Ubuntu VM + Docker Compose). AWS 전환은 별도 논의
-- MVP: 로그인/회원 기능 없음 — 추가 전 설계 공유
-- 데이터 기준일(마지막 수집일)을 푸터 등에 항상 표시
-- 수집은 주 1회 cron (`docker compose run --rm crawler`)
+- 호스팅: **AWS Lightsail** + Cloudflare (`dongorae.60fn.com`). 스키마 변경은 `db/migrations/`를 기존 DB에 적용
+- MVP: 로그인/회원/지원 폼 없음 — 추가 전 설계 공유
+- 데이터 기준일은 푸터에 표시. 공고·일감 `collected_at` 중 최근 값
+- 수집은 주 1회 cron (`docker compose --profile crawler run --rm crawler`)
