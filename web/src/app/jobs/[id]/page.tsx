@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { getJobById, workTypeLabel } from "@/lib/jobs";
+import { getJobById, jobSourceLabel, workTypeLabel } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -95,7 +95,7 @@ export default async function JobDetailPage({ params }: Props) {
         </div>
 
         <p className="mt-8 text-xs text-white/35">
-          출처: {job.sourceCode} · 수집: {job.collectedAt.slice(0, 10)}
+          출처: {jobSourceLabel(job.sourceCode)} · 수집: {job.collectedAt.slice(0, 10)}
         </p>
       </div>
     </article>

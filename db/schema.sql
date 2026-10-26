@@ -101,7 +101,10 @@ INSERT INTO sources (code, name, base_url, enabled) VALUES
   ('kstartup', 'K-Startup', 'https://www.k-startup.go.kr', 1),
   ('bizinfo', '기업마당', 'https://www.bizinfo.go.kr', 1),
   ('kised', '창업진흥원', 'https://www.kised.or.kr', 1),
-  ('mss', '중소벤처기업부', 'https://www.mss.go.kr', 1)
+  ('mss', '중소벤처기업부', 'https://www.mss.go.kr', 1),
+  ('wishket', '위시켓', 'https://www.wishket.com/project/', 1),
+  ('freemoa', '프리모아', 'https://www.freemoa.net/m4/s41', 1),
+  ('elancer', '이랜서', 'https://www.elancer.co.kr/list-partner', 1)
 ON DUPLICATE KEY UPDATE name = VALUES(name), base_url = VALUES(base_url);
 
 -- 공고 데이터는 크롤러가 수집. 시드 더미는 넣지 않음.

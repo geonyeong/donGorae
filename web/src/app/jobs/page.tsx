@@ -6,6 +6,7 @@ import {
   BUDGET_BAND_OPTIONS,
   getJobSourceCodes,
   getJobs,
+  jobSourceLabel,
   JOB_SKILLS,
   WORK_TYPE_OPTIONS,
 } from "@/lib/jobs";
@@ -57,7 +58,7 @@ export default async function JobsPage({
       href: `/jobs?skill=${encodeURIComponent(skill)}`,
     })),
     ...sources.map((source) => ({
-      label: source,
+      label: jobSourceLabel(source),
       href: `/jobs?source=${source}`,
     })),
   ];

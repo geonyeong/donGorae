@@ -36,7 +36,7 @@
 │   └── public/
 ├── crawler/                    # Python 주간 수집기
 │   ├── sources/                # 공고 파서 (kstartup, bizinfo, kised, mss)
-│   ├── job_sources/            # 일감 파서. 소스 확정 전 빈 목록
+│   ├── job_sources/            # 일감 파서 (wishket, freemoa, elancer)
 │   ├── normalize.py / upsert.py
 │   ├── job_normalize.py / upsert_jobs.py
 │   └── main.py
@@ -151,7 +151,7 @@ for url in urls:
 - 확신이 없는 사항은 임의로 결정하지 말고 질문할 것
 - `git push`는 개발자 요청 또는 승인 없이는 절대 금지
 - 1차 공고 소스: K-Startup, 기업마당(bizinfo), 창업진흥원(kised), 중기부(mss) — 신규 소스 추가 전 공유
-- 일감은 `jobs` 테이블과 `/jobs`만 사용. `programs`에 컬럼을 섞지 말 것. `job_sources`에 사이트를 넣기 전 이용약관·소스 확정을 물을 것. 로그인 뒤 본문 수집 금지
+- 일감은 `jobs` 테이블과 `/jobs`만 사용. `programs`에 컬럼을 섞지 말 것. 등록된 일감 소스는 위시켓·프리모아·이랜서이고, 주기는 공고와 같은 주 1회다. 새 사이트를 넣기 전 이용약관·소스 확정을 물을 것. 로그인 뒤 본문 수집 금지. robots.txt가 막는 API는 호출하지 말 것
 - UI는 스타트업 미디어형 유지. 보라 그라데이션·크림+세리프 등 흔한 AI 기본 룩 지양
 
 ---

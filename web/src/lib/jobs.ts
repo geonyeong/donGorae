@@ -125,6 +125,16 @@ export function workTypeLabel(workType: WorkType): string {
   return WORK_TYPE_OPTIONS.find((o) => o.value === workType)?.label ?? workType;
 }
 
+const JOB_SOURCE_LABELS: Record<string, string> = {
+  wishket: "위시켓",
+  freemoa: "프리모아",
+  elancer: "이랜서",
+};
+
+export function jobSourceLabel(sourceCode: string): string {
+  return JOB_SOURCE_LABELS[sourceCode] ?? sourceCode;
+}
+
 export async function getJobs(filters: JobFilters = {}): Promise<Job[]> {
   const where: string[] = ["1=1"];
   const params: unknown[] = [];

@@ -20,7 +20,7 @@
 │   └── src/app/jobs/    # 일감 목록·상세
 ├── crawler/             # 주간 수집 크롤러
 │   ├── sources/         # 창업 공고 파서
-│   └── job_sources/     # 일감 파서 (소스 확정 전 빈 목록)
+│   └── job_sources/     # 일감 파서 (위시켓, 프리모아, 이랜서)
 ├── db/
 │   ├── schema.sql       # MySQL 스키마
 │   └── migrations/      # 기존 DB용 변경 (002_jobs.sql)
@@ -94,7 +94,7 @@ docker compose --profile crawler run --rm crawler
 | `/jobs` | 검색, 근무 형태·예산·기술 필터 |
 | `/jobs/[id]` | 요약과 원문 링크. 지원 폼 없음 |
 
-데이터는 `programs`와 분리된 `jobs` 테이블입니다. `crawler/job_sources/`는 비어 있고, 주간 크롤은 `[jobs] no sources configured — skip`만 출력합니다. 위시켓·프리모아·크몽 등 신규 소스는 이용약관 확인 후 추가합니다. 로그인 뒤 본문은 수집하지 않습니다.
+데이터는 `programs`와 분리된 `jobs` 테이블입니다. 같은 주간 크롤(`docker compose --profile crawler run --rm crawler`, 일요일 02:00 KST)이 위시켓·프리모아 공개 목록을 함께 넣습니다. 이랜서 목록 API(`api.elancer.co.kr`)는 robots.txt가 수집을 막아, 공개 HTML에 카드가 있을 때만 저장합니다. 로그인 뒤 본문은 수집하지 않습니다.
 
 ## 배포 (Lightsail)
 

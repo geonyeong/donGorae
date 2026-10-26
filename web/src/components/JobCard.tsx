@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { workTypeLabel } from "@/lib/jobs";
+import { jobSourceLabel, workTypeLabel } from "@/lib/jobs";
 import type { Job } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ export function JobCard({ job }: Props) {
             <p className="line-clamp-2 text-sm leading-relaxed text-white/55">{job.summary}</p>
           )}
           <p className="mt-4 text-xs text-white/40">
-            {[job.budgetText, job.durationText, job.organization ?? job.sourceCode]
+            {[job.budgetText, job.durationText, job.organization ?? jobSourceLabel(job.sourceCode)]
               .filter(Boolean)
               .join(" · ")}
           </p>
